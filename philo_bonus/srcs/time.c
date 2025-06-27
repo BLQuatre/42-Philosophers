@@ -6,31 +6,26 @@
 /*   By: cauvray <cauvray@student.42lehavre.fr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/19 23:03:06 by cauvray           #+#    #+#             */
-/*   Updated: 2025/06/27 03:30:33 by cauvray          ###   ########.fr       */
+/*   Updated: 2025/06/27 04:48:10 by cauvray          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
 
-long	get_time(void)
+long	get_time_in_ms(void)
 {
-	struct timeval	curr_time;
+	struct timeval	tv;
 
-	gettimeofday(&curr_time, NULL);
-	return (curr_time.tv_sec * 1000 + curr_time.tv_usec / 1000);
+	gettimeofday(&tv, NULL);
+	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
 }
 
-long	get_time_since(time_t time)
+long	get_time_since(long time)
 {
-	return (get_time() - time);
+	return (get_time_in_ms() - time);
 }
 
-void	smart_sleep(t_philo *vars, int time)
+void	smart_sleep(long ms)
 {
-	time_t	waiting_until;
-
-	(void)vars;
-	waiting_until = get_time() + (long)time;
-	while (waiting_until > get_time())
-		usleep(200);
+	usleep(ms * 1000);
 }

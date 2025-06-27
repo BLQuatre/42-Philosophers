@@ -6,63 +6,78 @@
 /*   By: cauvray <cauvray@student.42lehavre.fr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/19 23:03:06 by cauvray           #+#    #+#             */
-/*   Updated: 2025/06/27 03:40:42 by cauvray          ###   ########.fr       */
+/*   Updated: 2025/06/27 04:47:25 by cauvray          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILO_BONUS_H
 # define PHILO_BONUS_H
 
-# include <fcntl.h>
 # include <pthread.h>
 # include <semaphore.h>
-# include <signal.h>
-# include <stdio.h>
-# include <stdlib.h>
-# include <sys/time.h>
-# include <sys/wait.h>
 # include <unistd.h>
+# include <fcntl.h>
+# include <sys/stat.h>
+# include <sys/types.h>
+# include <sys/wait.h>
+# include <sys/time.h>
+# include <signal.h>
+# include <stdlib.h>
+# include <stdio.h>
+# include <string.h>
+# include <stdbool.h>
 # include <limits.h>
 
-# define MIN_PHILO 1
-# define MAX_PHILO INT_MAX
+# define SEM_FORK		"philo_forks"
+# define SEM_DEATH		"philo_death"
+# define SEM_DISPLAY	"philo_display"
+# define SEM_UPDATE		"philo_update"
+
+typedef struct s_args
+{
+	int	nb_philo;
+	int	time_to_die;
+	int	time_to_eat;
+	int	time_to_sleep;
+	int	nb_time_must_eat;
+}	t_args;
+
+typedef struct s_dinner
+{
+	sem_t			*forks;
+	sem_t			*death; // serves as a shared between processes boolean
+	sem_t			*display;
+	sem_t			*update;
+	long			lunch_start;
+}	t_dinner;
 
 typedef struct s_philo
 {
-	int			i;
-	long		*info;
-	int			nb_meals;
-	int			is_dead;
-	long		init_time;
-	sem_t		*sem;
-	sem_t		*sem_death;
-	sem_t		*sem_refresh;
-	sem_t		*sem_eat;
-	sem_t		*sem_print;
-	pthread_t	th;
-	int			*ids;
-	long		eating_time;
-}				t_philo;
+	t_args			*args;
+	t_dinner			*dinner;
+	int				id;
+	int				nb_time_ate;
+	long			last_meal;
+}	t_philo;
 
-int				init_dinner(t_philo *philo);
-void			smart_sleep(t_philo *vars, int time);
-int				check_args(char **av, int ac, t_philo *philo);
-void			init_philosophers(t_philo *ptr);
-long			get_time(void);
-long			get_time_since(time_t time);
-
-void			action_think(t_philo *arg);
-void			take_fork(t_philo *arg);
-void			action_eat(t_philo *arg);
-void			start_eating(t_philo *arg);
-
-enum
-{
-	philo_n,
-	time_to_die,
-	eat_time,
-	sleep_time,
-	nb_meals
-};
+void	philosophing(t_philo **philos, int index, t_dinner *dinner, t_args *args);
+int		parsing(int argc, char *argv[]);
+void	error_args(void);
+void	error_fork(t_dinner *dinner);
+void	error_pthread(t_dinner *dinner);
+t_args	*init_args(int argc, char *argv[]);
+t_dinner	*init_dinner(t_args *args);
+t_philo	**create_philos(t_args *args, t_dinner *dinner);
+void	display_action(t_philo *philo, t_dinner *dinner, char *msg);
+void	action_eat(t_philo *philo, t_dinner *dinner);
+void	action_sleep_think(t_philo *philo, t_dinner *dinner);
+void	free_dinner(t_dinner *dinner);
+void	free_philos(t_philo **philosophers, int nb_philos);
+void	free_all(t_philo **philos, t_dinner *dinner, t_args *args);
+int		ft_isdigit(int c);
+long	ft_atol(const char *nptr);
+long	get_time_in_ms(void);
+long	get_time_since(long time);
+void	smart_sleep(long ms);
 
 #endif

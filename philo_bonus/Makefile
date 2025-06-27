@@ -6,7 +6,7 @@
 #    By: cauvray <cauvray@student.42lehavre.fr>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/25 10:30:46 by cauvray           #+#    #+#              #
-#    Updated: 2025/06/27 03:38:29 by cauvray          ###   ########.fr        #
+#    Updated: 2025/06/27 04:48:50 by cauvray          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,10 +17,13 @@ CFLAGS	= -Wall -Wextra -Werror
 SRCS_FILES =			\
 	actions.c			\
 	args.c				\
+	dinner.c			\
+	errors.c			\
+	free.c				\
 	init.c				\
 	philo_bonus.c		\
-	philosophers.c		\
-	time.c
+	time.c				\
+	utils.c
 
 SRCS_DIR	= srcs
 OBJS_DIR	= objs

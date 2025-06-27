@@ -6,74 +6,76 @@
 /*   By: cauvray <cauvray@student.42lehavre.fr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/19 23:03:06 by cauvray           #+#    #+#             */
-/*   Updated: 2025/06/27 03:51:57 by cauvray          ###   ########.fr       */
+/*   Updated: 2025/06/27 04:43:09 by cauvray          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
 
-static int	is_num(char **av)
+static int	pars_only_positive_numbers(int argc, char *argv[])
 {
-	int	i;
-	int	j;
+	int	i ;
+	int	j ;
 
-	j = 0;
-	i = -1;
-	while (av[++i])
+	i = 1 ;
+	while (i < argc)
 	{
-		j = -1;
-		while (av[i][++j])
+		j = 0 ;
+		if (argv[i][j] == '+')
+			j++ ;
+		while (argv[i][j])
 		{
-			if (!(av[i][j] >= '0' && av[i][j] <= '9'))
+			if (!ft_isdigit(argv[i][j]))
 				return (0);
+			j++ ;
 		}
+		i++ ;
 	}
 	return (1);
 }
 
-/**
- * @brief Converts a string to an integer.
- * atopi = ascii to positive integer
- * @param str The string to convert.
- * @return The converted integer, or -1 if the conversion fails.
- */
-static int	atopi(char *str)
+static bool	is_int_len(char *nbr)
 {
-	long long	nb;
+	int	size ;
+	int	i ;
 
-	nb = 0;
-	while (*str)
+	size = 0 ;
+	i = 0 ;
+	if (nbr[i] == '-' || nbr[i] == '+')
 	{
-		if (*str < '0' || *str > '9')
-			return (-1);
-		nb = (nb * 10) + (*str++ - '0');
+		size++ ;
+		i++ ;
 	}
-	if (nb < MIN_PHILO || nb > MAX_PHILO)
-		return (-1);
-	return ((int) nb);
+	while (nbr[i] == '0')
+		i++ ;
+	while (ft_isdigit(nbr[i]))
+	{
+		size++ ;
+		i++ ;
+	}
+	return (size <= 11);
 }
 
-int	check_args(char **av, int ac, t_philo *philo)
+static int	pars_only_non_nul_int(int argc, char *argv[])
 {
-	int		i;
-	long	*args;
+	long	value ;
+	int		i ;
 
-	if (!is_num(av))
-		return (0);
-	args = malloc(sizeof(long) * 5);
-	if (!args)
-		return (0);
-	i = -1;
-	while (av[++i])
-		args[i] = atopi(av[i]);
-	if (ac == 5)
-		args[4] = 0;
-	i = -1;
-	while (av[++i])
+	i = 1 ;
+	while (i < argc)
 	{
-		if (args[i] <= 0 || args[i] > INT_MAX || args[i] < INT_MIN)
-			return (free(args), 0);
+		if (!is_int_len(argv[i]))
+			return (0);
+		value = ft_atol(argv[i]);
+		if (value == 0 || value > INT_MAX)
+			return (0);
+		i++ ;
 	}
-	philo->info = args;
 	return (1);
+}
+
+int	parsing(int argc, char *argv[])
+{
+	return (pars_only_positive_numbers(argc, argv)
+		&& pars_only_non_nul_int(argc, argv));
 }

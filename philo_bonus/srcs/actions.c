@@ -6,52 +6,49 @@
 /*   By: cauvray <cauvray@student.42lehavre.fr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/19 23:03:06 by cauvray           #+#    #+#             */
-/*   Updated: 2025/06/27 03:37:36 by cauvray          ###   ########.fr       */
+/*   Updated: 2025/06/27 04:49:38 by cauvray          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
 
-void	action_think(t_philo *arg)
+void	display_action(t_philo *philo, t_dinner *dinner, char *msg)
 {
-	sem_wait(arg->sem_print);
-	printf("%ld %d is thinking\n",
-		get_time_since(arg->init_time),
-		arg->i + 1);
-	sem_post(arg->sem_print);
+	sem_wait(dinner->update);
+	if (dinner->death->__align == 1)
+	{
+		sem_wait(dinner->display);
+		printf("%ld %d %s \n",
+			get_time_since(dinner->lunch_start), philo->id, msg);
+		sem_post(dinner->display);
+	}
+	sem_post(dinner->update);
 }
 
-void	take_fork(t_philo *arg)
+void	action_eat(t_philo *philo, t_dinner *dinner)
 {
-	sem_wait(arg->sem_print);
-	printf("%ld %d has taken a fork\n",
-		get_time_since(arg->init_time),
-		arg->i + 1);
-	sem_post(arg->sem_print);
+	if (sem_wait(dinner->forks) == 0)
+	{
+		display_action(philo, dinner, "has taken a fork");
+		usleep(200);
+		if (sem_wait(dinner->forks) == 0)
+		{
+			display_action(philo, dinner, "has taken a fork");
+			display_action(philo, dinner, "is eating");
+			smart_sleep(philo->args->time_to_eat);
+			sem_wait(dinner->update);
+			philo->last_meal = get_time_in_ms();
+			philo->nb_time_ate++ ;
+			sem_post(dinner->update);
+			sem_post(dinner->forks);
+		}
+		sem_post(dinner->forks);
+	}
 }
 
-void	action_eat(t_philo *arg)
+void	action_sleep_think(t_philo *philo, t_dinner *dinner)
 {
-	sem_wait(arg->sem_print);
-	printf("%ld %d is eating\n",
-		get_time_since(arg->init_time),
-		arg->i + 1);
-	sem_post(arg->sem_print);
-}
-
-void	start_eating(t_philo *arg)
-{
-	sem_wait(arg->sem);
-	take_fork(arg);
-	sem_wait(arg->sem_refresh);
-	arg->eating_time = get_time();
-	sem_post(arg->sem_refresh);
-	action_eat(arg);
-	smart_sleep(arg, arg->info[eat_time]);
-	sem_wait(arg->sem_refresh);
-	if (arg->info[nb_meals])
-		arg->nb_meals++;
-	sem_post(arg->sem_refresh);
-	sem_post(arg->sem);
-	sem_post(arg->sem);
+	display_action(philo, dinner, "is sleeping");
+	smart_sleep(philo->args->time_to_sleep);
+	display_action(philo, dinner, "is thinking");
 }
